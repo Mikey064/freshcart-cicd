@@ -1,0 +1,14 @@
+# Reviewed 2026-08-31 — these are npm internal packages from the Node base image.
+# Not used by our application code. Will resolve when base image is updated.
+
+# brace-expansion: DoS via memory exhaustion (npm internal)
+CVE-2026-14257
+
+# brace-expansion: DoS via unbounded arrays (npm internal)
+CVE-2026-69152
+
+# ip-address: SSRF via inconsistent parsing (npm internal)
+CVE-2026-69192
+
+# tar: DoS via crafted archive (npm internal)
+CVE-2026-73566
