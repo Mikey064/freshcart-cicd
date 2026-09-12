@@ -1,0 +1,8 @@
+cat > ~/learncloud/FreshCart/storefront/.dockerignore << 'EOF'
+node_modules
+dist
+.env
+.env.*
+.git
+*.log
+EOF
