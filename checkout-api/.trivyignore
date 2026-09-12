@@ -12,6 +12,3 @@ CVE-2026-69192
 
 # tar: DoS via crafted archive (npm internal)
 CVE-2026-73566
-
-# openssl: OpenSSL: Denial of Service via unbounded memory growth in QUIC server
-CVE-2026-14456
