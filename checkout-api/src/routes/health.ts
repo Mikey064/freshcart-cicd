@@ -5,7 +5,7 @@ export const healthRouter = Router();
 
 // Make an edit here to break the health check and use git revert to go back 
 // to a working state.
-healthRouter.get("/api/healthz", async (_req, res) => {
+healthRouter.get("/healthz", async (_req, res) => {
   try {
     await pool.query("select 1");
     res.status(200).json({ status: "ok" });
