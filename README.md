@@ -1,12 +1,11 @@
 # FreshCart CI/CD (Week 6 Capstone)
 
-This repo picks up where [`freshcart-tf`](https://github.com/Mikey064/freshcart-tf) (Week 5 — Terraform-provisioned GCP infra) left off. That capstone stood up the load balancer, private backend VM, and staging environment on GCP. This one automates getting `checkout-api` onto that infrastructure: a pull-request CI check, a build → scan → push pipeline authenticated with no long-lived keys, an automatic staging deploy, a manually-approved production deploy, and a real rollback.
+This repo picks up where [`freshcart-tf`](https://github.com/Mikey064/freshcart-tf) (Terraform-provisioned GCP infra) left off. That capstone stood up the load balancer, private backend VM, and staging environment on GCP. This one automates getting `checkout-api` onto that infrastructure: a pull-request CI check, a build → scan → push pipeline authenticated with no long-lived keys, an automatic staging deploy, a manually-approved production deploy, and a real rollback.
 
-> TODO (Mikey): confirm/replace — Artifact Registry repo name, staging VM instance name, and the pipeline diagram file path below before publishing.
 
 ## Architecture
 
-![Pipeline diagram](docs/pipeline-diagram.png) <!-- TODO: confirm actual filename/path -->
+![Pipeline Diagram](pipeline-diagram.jpg)
 
 Every job's trigger and target, PR to production:
 
@@ -15,7 +14,7 @@ Every job's trigger and target, PR to production:
 | CI | `pull_request` → `main` | pass/fail check on the PR |
 | build-and-scan | push to `main` | Docker image tagged `:<commit-sha>`, scanned with Trivy, pushed to Artifact Registry |
 | deploy-staging | after build-and-scan succeeds | image running on the staging VM (`environment: staging`) |
-| deploy-production | after staging deploy succeeds | same image tag promoted to the prod/dev VM behind the load balancer (`environment: production`, required reviewer) |
+| deploy-production | after staging deploy succeeds | same image tag promoted to the prod/dev VM behind the load balancer (`environment: prod`, required reviewer) |
 
 Infra target: GCP project `freshcart-twotier`, region `us-central1`. Production backend is the private VM (`dev-checkout-api`, no public IP) sitting behind the HTTP(S) load balancer at `136.68.219.236`, provisioned in `freshcart-tf`. Staging is the separate e2-small environment from that same repo's stretch goal.
 
@@ -37,9 +36,9 @@ Rather than a separate rollback workflow, the rollback path is the same pipeline
 
 1. **Broke it on purpose:** changed the health check route in `checkout-api/src/routes/health.ts` from `/healthz` to `/api/healthz` — a one-line change that silently moves the endpoint the load balancer's health check depends on.
 2. **Shipped it:** committed and pushed to `main`, let the pipeline build, scan, and deploy it through staging to production as normal.
-3. **Confirmed the break:** the load balancer's health check against `/healthz` started failing once the broken image reached production. <!-- TODO: paste the actual failing health-check output/screenshot here -->
+3. **Confirmed the break:** the load balancer's health check against `/healthz` started failing once the broken image reached production.![alt text](<3.6 health-check further  .jpg>) 
 4. **Rolled back:** ran `git revert <commit-hash> --no-edit`, pushed the revert to `main`, and let the same pipeline redeploy the restored route through staging and an approved production deploy.
-5. **Confirmed recovery:** `/healthz` returned healthy again once the reverted image was live. <!-- TODO: paste the actual healthy output/screenshot here -->
+5. **Confirmed recovery:** `/healthz` returned healthy again once the reverted image was live. ![alt text](<3.8 revert confirmed successfully.jpg>)
 
 Screenshots for each step above are in [`/screenshots`](./screenshots).
 
@@ -60,7 +59,7 @@ npm install
 npm run dev
 ```
 
-Load `db/init.sql` into your database once to create the schema and seed products. Once running: `curl localhost:3000/healthz` → `{"status":"ok"}`.
+Load `db/init.sql` into your database once to create the schema and seed products. Once running: `curl http://34.160.7.150/healthz` → `{"status":"ok"}`.
 
 ```
 cd storefront
